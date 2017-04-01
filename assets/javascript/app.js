@@ -1,22 +1,14 @@
-// Initial array of giphys
-var giphys = [ "Ferret", "Giraffe", "Hedgehog", "Rabbit", "Kittens", "Puppies"];
-var firstTime = true;
+// Initial array of giphy buttons.
+var giphys = [ "Ferret", "Giraffe", "Hedgehog", "Rabbit", "Kitten", "Puppy"];
 
-// displaygiphyInfo function re-renders the HTML to display the appropriate content
-function displaygiphyInfo() {
+// displayGiphyInfo function updates HTML content to display the giphy images.
+function displayGiphyInfo() {
 
-
-if (!firstTime) {
-
-  // console.log($(this).attr(img));
-  // $("<img>").attr("src", imgStillURL);
-
-}
-
+  // Use the button's name to create variable for use in search. 
   var giphy = $(this).attr("data-name");
-  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + giphy + "&api_key=dc6zaTOxFJmzC&limit=10&offset=0"; 
 
-  firstTime = false;
+  // Actual search URL to be submitted for result set of giphys.
+  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + giphy + "&api_key=dc6zaTOxFJmzC&limit=10&offset=0"; 
 
   // Creating an AJAX call for the specific giphy button being clicked
   $.ajax({
@@ -26,37 +18,47 @@ if (!firstTime) {
 
     // console.log(response);
 
-    // Creating a div to hold the giphy
-    var giphyDiv = $("<div class='giphy'>");
+    // Creating a div to hold the group of giphys
+    var giphyDiv = $("<div class='giphyInfo'>");
 
+    // Loop through the entire list to create the corresponding html.
     for (var i = 0; i < response.data.length; i++) {
 
+      // Process this specific row of the record set.
       var giphyResult = response.data[i];
 
-      // Displaying the rating
+      // Assign the URLs for this giphy: still and gif
+      var imgStillURL = giphyResult.images.fixed_height_still.url;
+      var imgURL = giphyResult.images.fixed_height.url;
+
+      // Shortcut variable for start of html element using jQuery.
+      var imageInfo = $("<img>");
+
+      // Default image to display.
+      imageInfo.attr("src", imgStillURL);
+
+      // Store both types of images in a data object.
+      imageInfo.attr("data-still", imgStillURL);
+      imageInfo.attr("data-giphy", imgURL);
+
+      // Create class for this image so we capture a click on it later.
+      imageInfo.addClass("giphyImage");
+
+      // Assign the rating for the image.
       giphyDiv.append($("<p>").text("Rating: " + giphyResult.rating));
 
-      // Retrieving the URL for the images: still and gif
-      var imgURL = giphyResult.images.fixed_height.url;
-      var imgStillURL = giphyResult.images.fixed_height_still.url;
+      // Append the images to current html layout.
+      giphyDiv.append(imageInfo);
 
-      // Creating variables to hold the images
-      var image = $("<img>").attr("src", imgURL);
-      var stillImage = $("<img>").attr("src", imgStillURL); 
-
-      // Appending the images
-      giphyDiv.append(stillImage);
-      giphyDiv.append(image);
-
-      // Putting the entire giphy above the previous giphys
+      // Place this giphy above the previous giphys.
       $("#giphys-view").prepend(giphyDiv);
-
     }
+
   });
 
 }
 
-// Function for displaying giphy data
+// Function for displaying Animal giphy buttons.
 function renderButtons() {
 
   // Deleting the giphys prior to adding new giphys
@@ -69,36 +71,67 @@ function renderButtons() {
     // Then dynamicaly generating buttons for each giphy in the array
     // This code $("<button>") is all jQuery needs to create the beginning
     // and end tag. (<button></button>)
-    var a = $("<button>");
+    var btn = $("<button>");
     // Adding a class of giphy to our button
-    a.addClass("giphy");
-    // Adding a data-attribute
-    a.attr("data-name", giphys[i]);
-    // Providing the initial button text
-    a.text(giphys[i]);
-    // Adding the button to the buttons-view div
-    $("#buttons-view").append(a);
+    btn.addClass("giphy");
 
+    // Add Bootstrap color
+    btn.addClass("btn-primary");
+
+    // Adding a data-attribute
+    btn.attr("data-name", giphys[i]);
+
+    // Providing the initial button text
+    btn.text(giphys[i]);
+
+    // Adding the button to the buttons-view div
+    $("#buttons-view").append(btn);
   }
 }
 
-// This function handles events where a giphy button is clicked
+// This function handles events where a button is clicked
 $("#add-giphy").on("click", function(event) {
   event.preventDefault();
   // This line grabs the input from the textbox and removes all surrounding white space.
   var giphy = $("#giphy-input").val().trim();
 
+  if (giphy > "") {
   // Adding giphy from the textbox to our array
   giphys.push(giphy);
 
-  // Calling renderButtons which handles the processing of our giphy array
+    // Calling renderButtons which handles the processing of our giphy array
   renderButtons();
 
   $("#giphy-input").val("");
+
+  }
 });
 
-// Adding a click event listener to all elements with a class of "giphy"
-$(document).on("click", ".giphy", displaygiphyInfo);
+// This function handles events where a giphy is clicked
+$(document).on("click", ".giphyImage", function() {
+
+  var giphyClicked = $(this);
+  //console.log(giphyClicked);
+
+  // If the current image is a still image...
+  if (giphyClicked.attr("src") == giphyClicked.attr("data-still")) {
+
+    // Change image to a moving image.
+    giphyClicked.attr("src", giphyClicked.attr("data-giphy"));
+  }
+  else {  // Image is moving...
+
+    // So change it back to a still image.
+    giphyClicked.attr("src", giphyClicked.attr("data-still"));
+  }
+
+  // Replace image where it is.
+  giphyClicked.append(giphyClicked);
+
+});
+
+// Click event listener for all button elements with a class of "giphy"
+$(document).on("click", ".giphy", displayGiphyInfo);
 
 // Calling the renderButtons function to display the intial buttons
 renderButtons();

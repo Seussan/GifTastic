@@ -5,9 +5,23 @@ input {
  	margin: 10px;
 }
 
+body {
+	font: 15px arial, sans-serif;
+}
+
+h1 {
+	font-size: 20px;
+}
+
 p {
 	margin: 10px;
 }
 
-.giphy {
+/*.giphyImage {
+  float: left;
+  padding: 10px;
+}*/
+
+.btn-primary {
+	padding: 10px;
 }
